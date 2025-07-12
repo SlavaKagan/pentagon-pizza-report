@@ -2,3 +2,5 @@
 Logs/
 Utils/Info/
 .idea/
+__pycache__/
+
