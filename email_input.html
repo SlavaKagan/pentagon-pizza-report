@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>שליחת דוח סניפים</title>
+</head>
+<body style="font-family: Arial; text-align: right; margin: 40px;">
+  <h2>📬 הזן כתובת מייל לשליחת דוח סטטוס</h2>
+  <form id="emailForm">
+    <label for="email">כתובת מייל:</label>
+    <input type="email" id="email" name="email" required />
+    <button type="submit">שלח דוח</button>
+  </form>
+  <p id="status" style="margin-top: 20px; font-weight: bold;"></p>
+
+  <script>
+    document.getElementById("emailForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const response = await fetch("http://localhost:5000/send_report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+
+      const result = await response.json();
+      document.getElementById("status").innerText = result.message;
+    });
+  </script>
+</body>
+</html>
