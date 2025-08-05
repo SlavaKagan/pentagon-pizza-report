@@ -4,4 +4,3 @@ python-dotenv
 gunicorn
 uvicorn
 selenium==4.19.0
-chromedriver-binary==120.0.6099.71.0
