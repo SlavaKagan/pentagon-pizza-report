@@ -17,13 +17,17 @@
   document.getElementById('emailForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
-    const response = await fetch('/send_report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    const data = await response.json();
-    document.getElementById('message').innerText = data.message;
+    try {
+      const response = await fetch('/send_report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await response.json();
+      document.getElementById('message').innerText = data.message;
+    } catch (error) {
+      document.getElementById('message').innerText = 'שגיאה: ' + error.message;
+    }
   });
 </script>
 </body>
