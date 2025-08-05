@@ -1,8 +1,4 @@
-import chromedriver_autoinstaller
-chromedriver_autoinstaller.install()
-
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -22,8 +18,8 @@ def get_live_status_text(url: str) -> str | None:
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
     options.add_argument("--window-size=1920,1080")
 
-    service = Service(executable_path=CHROMEDRIVER_PATH)
-    driver = webdriver.Chrome(service=service, options=options)
+    #service = Service(executable_path=CHROMEDRIVER_PATH)
+    driver = webdriver.Chrome(options=options)
 
     try:
         driver.get(url)
