@@ -3,3 +3,4 @@ flask-cors
 selenium
 python-dotenv
 gunicorn
+uvicorn
