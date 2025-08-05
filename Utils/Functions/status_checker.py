@@ -4,7 +4,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from Configs.config import USER_AGENT, CHROMEDRIVER_PATH
+from Configs.config import USER_AGENT, CHROMEDRIVER_PATH, CHROME_BIN
 from Infrastructure.Logging.logger import logger
 
 def get_live_status_text(url: str) -> str | None:
