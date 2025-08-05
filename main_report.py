@@ -69,7 +69,7 @@ def generate_summary_html(timestamp, rows, busy_count, total_locations):
         </table>
     """
 
-    if busy_count < total_locations / 2:
+    if busy_count > total_locations / 2:
         html_content += """
             <p style='color: #d32f2f; font-weight: bold; margin-top: 20px; font-size: 18px; text-align: center;'>
                 רוב הפיצריות עמוסות ויש סיכוי למשהו שמתרחש בתוך הפנטגון וצפי לאירוע בשעות הקרובות, יש להיערך בהתאם!
