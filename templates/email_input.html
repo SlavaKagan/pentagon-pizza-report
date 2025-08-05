@@ -13,19 +13,18 @@
   </form>
   <p id="status" style="margin-top: 20px; font-weight: bold;"></p>
 
-  <script>
-    document.getElementById("emailForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const response = await fetch("http://localhost:5000/send_report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-
-      const result = await response.json();
-      document.getElementById("status").innerText = result.message;
+<script>
+  document.getElementById('emailForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const response = await fetch('/send_report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
     });
-  </script>
+    const data = await response.json();
+    document.getElementById('message').innerText = data.message;
+  });
+</script>
 </body>
 </html>
