@@ -6,3 +6,4 @@ uvicorn
 selenium==4.19.0
 chromium
 chromedriver-binary==120.0.6099.71.0
+chromedriver-autoinstaller==0.6.2
