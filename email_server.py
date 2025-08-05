@@ -17,6 +17,3 @@ def send_report():
         return jsonify({"message": f"הדוח נשלח בהצלחה אל {email}"}), 200
     except Exception as e:
         return jsonify({"message": f"שגיאה בשליחה: {str(e)}"}), 500
-
-if __name__ == "__main__":
-    app.run(port=5000)
