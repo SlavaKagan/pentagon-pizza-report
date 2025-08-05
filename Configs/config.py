@@ -18,8 +18,10 @@ USER_AGENT = (
 
 if platform.system() == "Windows":
     CHROMEDRIVER_PATH = os.path.join(BASE_DIR, "chromedriver.exe")
+    CHROME_BIN = os.environ.get("CHROME_BIN", os.path.join(BASE_DIR, "chrome.exe"))
 else:
-    CHROMEDRIVER_PATH = os.path.join(BASE_DIR, "chromedriver")
+    CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH", "/usr/bin/chromedriver")
+    CHROME_BIN = os.environ.get("CHROME_BIN", "/usr/bin/chromium")
 
 LOGO_PATH = os.path.join(BASE_DIR, "Utils", "Images", "PizzaLogo.jpg")
 LOG_FILE = os.path.join(BASE_DIR, "Logs", "pizza_alerts.log")
