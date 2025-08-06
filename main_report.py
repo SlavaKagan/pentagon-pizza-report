@@ -1,9 +1,13 @@
 import datetime
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from Utils.Functions.status_checker import get_live_status_text
 from Configs.emailer import send_email
 from Infrastructure.Logging.logger import logger
 from Utils.locations import LOCATIONS
 from Utils.Functions.email_validator import is_valid_email
+from Configs.config import USER_AGENT, CHROMEDRIVER_PATH, CHROME_BIN
 
 def generate_and_send_report(to_email: str):
     if not is_valid_email(to_email):
@@ -16,34 +20,61 @@ def generate_and_send_report(to_email: str):
     busy_count = 0
     total_locations = len(LOCATIONS)
 
-    for place in LOCATIONS:
-        name = place["name"]
-        url = place["url"]
+    # הגדרת דפדפן פעם אחת
+    options = Options()
+    options.binary_location = CHROME_BIN
+    options.add_argument('--headless=new')
+    options.add_argument("--no-sandbox")
+    options.add_argument('--disable-gpu')
+    options.add_argument("--single-process")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument(f'user-agent={USER_AGENT}')
+    options.add_argument("--log-level=3")
+    options.add_argument("--disable-logging")
+    options.add_argument('--disable-software-rasterizer')
+    options.add_argument('--disable-background-networking')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-sync')
+    options.add_argument('--disable-default-apps')
+    options.add_argument('--disable-translate')
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    options.add_argument("--window-size=1920,1080")
 
-        logger.info(f"בודק את {name}...")
-        status_text = get_live_status_text(url)
+    service = Service(executable_path=CHROMEDRIVER_PATH)
+    driver = webdriver.Chrome(service=service, options=options)
+    logger.info("פותח דפדפן Chrome...")
 
-        if status_text:
-            lower = status_text.lower()
-            if any(k in lower for k in ["closed", "סגור"]):
-                summaries.append(generate_html_row(name, status_text, "🚪", "#455a64"))
-            elif any(k in lower for k in ["less busy", "not busy", "רגוע", "לא עמוס"]):
-                summaries.append(generate_html_row(name, status_text, "✅", "#2e7d32"))
+    try:
+        for place in LOCATIONS:
+            name = place["name"]
+            url = place["url"]
+
+            logger.info(f"בודק את {name}...")
+            status_text = get_live_status_text(driver, url)
+
+            if status_text:
+                lower = status_text.lower()
+                if any(k in lower for k in ["closed", "סגור"]):
+                    summaries.append(generate_html_row(name, status_text, "🚪", "#455a64"))
+                elif any(k in lower for k in ["less busy", "not busy", "רגוע", "לא עמוס"]):
+                    summaries.append(generate_html_row(name, status_text, "✅", "#2e7d32"))
+                else:
+                    summaries.append(generate_html_row(name, status_text, "📈", "#d32f2f"))
+                    if not any(k in lower for k in ["closed", "סגור"]):
+                        busy_count += 1
             else:
-                summaries.append(generate_html_row(name, status_text, "📈", "#d32f2f"))
-                if not any(k in lower for k in ["closed", "סגור"]):  # רק אם לא סגור
-                    busy_count += 1
+                summaries.append(generate_html_row(name, "אין מידע בזמן אמת", "❓", "#999"))
+
+        if summaries:
+            subject = "📡 דוח סטטוס יומי - Pentagon Pizza"
+            body_text = f"דוח סטטוס לכל הסניפים נכון ל־{now}"
+            body_html = generate_summary_html(now, summaries, busy_count, total_locations)
+            send_email(subject, body_text, body_html, to_email)
         else:
-            summaries.append(generate_html_row(name, "אין מידע בזמן אמת", "❓", "#999"))
-
-    if summaries:
-        subject = "📡 דוח סטטוס יומי - Pentagon Pizza"
-        body_text = f"דוח סטטוס לכל הסניפים נכון ל־{now}"
-        body_html = generate_summary_html(now, summaries, busy_count, total_locations)
-        send_email(subject, body_text, body_html, to_email)
-    else:
-        logger.info("אין תוצאות לשלוח.")
-
+            logger.info("אין תוצאות לשלוח.")
+    finally:
+        driver.quit()
+        logger.info("דפדפן נסגר בהצלחה.")
 
 def generate_html_row(place_name, status, icon, color):
     return f"""
@@ -52,7 +83,6 @@ def generate_html_row(place_name, status, icon, color):
             <td style='padding:4px 6px; border:1px solid #ccc; text-align: center; color:{color}; font-size: 14px;'>{status}</td>
         </tr>
     """
-
 
 def generate_summary_html(timestamp, rows, busy_count, total_locations):
     html_content = f"""
@@ -91,9 +121,7 @@ def generate_summary_html(timestamp, rows, busy_count, total_locations):
     """
     return html_content
 
-
 if __name__ == "__main__":
-
     while True:
         input_email = input("הזן כתובת מייל לקבלת הדוח: ").strip()
         if is_valid_email(input_email):

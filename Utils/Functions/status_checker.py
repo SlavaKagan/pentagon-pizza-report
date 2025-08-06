@@ -1,36 +1,9 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from Configs.config import USER_AGENT, CHROMEDRIVER_PATH, CHROME_BIN
 from Infrastructure.Logging.logger import logger
 
-def get_live_status_text(url: str) -> str | None:
-    options = Options()
-    options.binary_location = CHROME_BIN
-    options.add_argument('--headless=new')
-    options.add_argument("--no-sandbox")
-    options.add_argument('--disable-gpu')
-    options.add_argument("--single-process")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument(f'user-agent={USER_AGENT}')
-    options.add_argument("--log-level=3")
-    options.add_argument("--disable-logging")
-    options.add_argument('--disable-software-rasterizer')
-    options.add_argument('--disable-background-networking')
-    options.add_argument('--disable-extensions')
-    options.add_argument('--disable-sync')
-    options.add_argument('--disable-default-apps')
-    options.add_argument('--disable-translate')
-    options.add_experimental_option("excludeSwitches", ["enable-logging"])
-    options.add_argument("--window-size=1920,1080")
-
-    driver = None
+def get_live_status_text(driver, url: str) -> str | None:
     try:
-        service = Service(executable_path=CHROMEDRIVER_PATH)
-        logger.info("פותח דפדפן Chrome...")
-        driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
         wait = WebDriverWait(driver, 15)
 
@@ -74,17 +47,8 @@ def get_live_status_text(url: str) -> str | None:
 
     except Exception as e:
         logger.error(f"שגיאה באיתור סטטוס: {e}")
-        if driver:
-            try:
-                driver.save_screenshot("error_status.png")
-            except Exception as screenshot_error:
-                logger.warning(f"שגיאה ביצירת Screenshot: {screenshot_error}")
+        try:
+            driver.save_screenshot("error_status.png")
+        except Exception as screenshot_error:
+            logger.warning(f"שגיאה ביצירת Screenshot: {screenshot_error}")
         return None
-
-    finally:
-        if driver:
-            try:
-                driver.quit()
-                logger.info("דפדפן נסגר בהצלחה.")
-            except Exception as quit_error:
-                logger.warning(f"שגיאה בסגירת הדפדפן: {quit_error}")
