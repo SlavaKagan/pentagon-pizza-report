@@ -9,9 +9,10 @@ from Infrastructure.Logging.logger import logger
 def get_live_status_text(url: str) -> str | None:
     options = Options()
     options.binary_location = CHROME_BIN
-    options.add_argument('--headless')
+    options.add_argument('--headless=new')
     options.add_argument("--no-sandbox")
     options.add_argument('--disable-gpu')
+    options.add_argument("--single-process")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument(f'user-agent={USER_AGENT}')
     options.add_argument("--log-level=3")
@@ -74,3 +75,4 @@ def get_live_status_text(url: str) -> str | None:
 
     finally:
         driver.quit()
+        del driver
