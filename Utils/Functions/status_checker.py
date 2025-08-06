@@ -20,18 +20,17 @@ def get_live_status_text(url: str) -> str | None:
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
     options.add_argument("--window-size=1920,1080")
 
-    service = Service(executable_path=CHROMEDRIVER_PATH)
-    driver = webdriver.Chrome(service=service, options=options)
-
+    driver = None
     try:
+        service = Service(executable_path=CHROMEDRIVER_PATH)
+        logger.info("פותח דפדפן Chrome...")
+        driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
         wait = WebDriverWait(driver, 15)
 
         logger.info("ממתין לטעינת 'Live' או 'זמן אמת'...")
-
         wait.until(lambda d: "live" in d.page_source.lower() or "זמן אמת" in d.page_source)
 
-        # חיפוש אלמנט שיש בו Live ולאחריו sibling שמכיל את הטקסט
         logger.info("מאתר את סטטוס ה־Live...")
         live_element = driver.find_elements(
             By.XPATH,
@@ -44,7 +43,6 @@ def get_live_status_text(url: str) -> str | None:
                 logger.info(f"סטטוס עומס חי: {status}")
                 return status
 
-        # fallback: חפש לפי fontBodySmall אם לא נמצא קודם
         logger.info("ניסיון fallback לזיהוי סטטוס...")
         all_font_elements = driver.find_elements(By.XPATH, "//div[contains(@class, 'fontBodySmall')]")
         for i, el in enumerate(all_font_elements):
@@ -70,9 +68,17 @@ def get_live_status_text(url: str) -> str | None:
 
     except Exception as e:
         logger.error(f"שגיאה באיתור סטטוס: {e}")
-        driver.save_screenshot("error_status.png")
+        if driver:
+            try:
+                driver.save_screenshot("error_status.png")
+            except Exception as screenshot_error:
+                logger.warning(f"שגיאה ביצירת Screenshot: {screenshot_error}")
         return None
 
     finally:
-        driver.quit()
-        del driver
+        if driver:
+            try:
+                driver.quit()
+                logger.info("דפדפן נסגר בהצלחה.")
+            except Exception as quit_error:
+                logger.warning(f"שגיאה בסגירת הדפדפן: {quit_error}")
