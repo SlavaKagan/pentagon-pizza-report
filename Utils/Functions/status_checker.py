@@ -17,6 +17,12 @@ def get_live_status_text(url: str) -> str | None:
     options.add_argument(f'user-agent={USER_AGENT}')
     options.add_argument("--log-level=3")
     options.add_argument("--disable-logging")
+    options.add_argument('--disable-software-rasterizer')
+    options.add_argument('--disable-background-networking')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-sync')
+    options.add_argument('--disable-default-apps')
+    options.add_argument('--disable-translate')
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
     options.add_argument("--window-size=1920,1080")
 
