@@ -2,26 +2,70 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>שליחת דוח סניפים</title>
+  <title>שלח דוח סטטוס סניפים</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: right; margin: 40px; }
-    h2 { margin-top: 0; }
-    #status { margin-top: 16px; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;  /* מרכז אנכית */
+      align-items: center;      /* מרכז אופקית */
+      text-align: center;
+      background: #fafafa;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      align-self: center;
+    }
+
+    input[type="email"] {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 14px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      cursor: pointer;
+    }
+
+    button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
     .ok { color: #2e7d32; }
     .err { color: #d32f2f; }
     .info { color: #1976d2; }
-    button[disabled] { opacity: 0.6; cursor: not-allowed; }
 
-    /* הלוגו קבוע בתחתית המסך */
+    /* הלוגו */
     #logo {
-      position: fixed;
-      bottom: 20px;
-      right: 20px; /* אפשר לשנות ל-left: 20px; אם רוצים בצד שמאל */
-      border-radius: 12px;
+      margin-top: 20px;
       max-width: 200px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      background: white;
-      padding: 5px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.2);
     }
   </style>
 </head>
@@ -36,7 +80,8 @@
 
   <p id="status"></p>
 
-  <img id="logo" src="{{ url_for('static', filename='PizzaLogo.jpg') }}" alt="Pizza Logo">
+  <!-- הלוגו במרכז מתחת לטופס -->
+  <img id="logo" src="{{ url_for('static', filename='PizzaLogo.jpg') }}" alt="Pizza Logo" />
 
   <script>
     const form = document.getElementById('emailForm');
@@ -56,7 +101,7 @@
       }
 
       sendBtn.disabled = true;
-      statusEl.textContent = '⏳ שולח את הדוח, ייתכן שייקח חצי דקה-דקה...';
+      statusEl.textContent = '⏳ שולח את הדוח...';
       statusEl.className = 'info';
 
       try {
@@ -65,7 +110,6 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email })
         });
-
         const data = await res.json().catch(() => ({}));
 
         if (res.ok) {
