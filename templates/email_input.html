@@ -3,32 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <title>שליחת דוח סניפים</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: right; margin: 40px; }
+    h2 { margin-top: 0; }
+    #status { margin-top: 16px; font-weight: bold; }
+    .ok { color: #2e7d32; }
+    .err { color: #d32f2f; }
+    .info { color: #1976d2; }
+    button[disabled] { opacity: 0.6; cursor: not-allowed; }
+  </style>
 </head>
-<body style="font-family: Arial; text-align: right; margin: 40px;">
+<body>
   <h2>📬 הזן כתובת מייל לשליחת דוח סטטוס</h2>
+
   <form id="emailForm">
     <label for="email">כתובת מייל:</label>
-    <input type="email" id="email" name="email" required />
-    <button type="submit">שלח דוח</button>
+    <input type="email" id="email" name="email" required placeholder="example@gmail.com" />
+    <button id="sendBtn" type="submit">שלח דוח</button>
   </form>
-  <p id="status" style="margin-top: 20px; font-weight: bold;"></p>
 
-<script>
-  document.getElementById('emailForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    try {
-      const response = await fetch('/send_report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await response.json();
-      document.getElementById('message').innerText = data.message;
-    } catch (error) {
-      document.getElementById('message').innerText = 'שגיאה: ' + error.message;
-    }
-  });
-</script>
+  <p id="status"></p>
+
+  <script>
+    const form = document.getElementById('emailForm');
+    const emailInput = document.getElementById('email');
+    const statusEl = document.getElementById('status');
+    const sendBtn = document.getElementById('sendBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = (emailInput.value || '').trim();
+
+      // בדיקה בסיסית לצד לקוח
+      if (!email) {
+        statusEl.textContent = '❌ יש להזין כתובת מייל';
+        statusEl.className = 'err';
+        emailInput.focus();
+        return;
+      }
+
+      // מצב "שולח"
+      sendBtn.disabled = true;
+      statusEl.textContent = '⏳ שולח את הדוח, ייתכן שייקח חצי דקה-דקה...';
+      statusEl.className = 'info';
+
+      try {
+        const res = await fetch('/send_report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok) {
+          statusEl.textContent = `✅ ${data.message || 'הדוח נשלח בהצלחה'} (${email})`;
+          statusEl.className = 'ok';
+          // אופציונלי: ניקוי השדה
+          // emailInput.value = '';
+        } else {
+          statusEl.textContent = `❌ ${data.message || 'אירעה שגיאה בשליחה'}`;
+          statusEl.className = 'err';
+        }
+      } catch (err) {
+        statusEl.textContent = `❌ שגיאה בשליחת הבקשה: ${err?.message || ''}`;
+        statusEl.className = 'err';
+      } finally {
+        sendBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
