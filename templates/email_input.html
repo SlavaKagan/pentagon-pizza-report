@@ -11,6 +11,18 @@
     .err { color: #d32f2f; }
     .info { color: #1976d2; }
     button[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+    /* הלוגו קבוע בתחתית המסך */
+    #logo {
+      position: fixed;
+      bottom: 20px;
+      right: 20px; /* אפשר לשנות ל-left: 20px; אם רוצים בצד שמאל */
+      border-radius: 12px;
+      max-width: 200px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      background: white;
+      padding: 5px;
+    }
   </style>
 </head>
 <body>
@@ -24,6 +36,8 @@
 
   <p id="status"></p>
 
+  <img id="logo" src="{{ url_for('static', filename='PizzaLogo.jpg') }}" alt="Pizza Logo">
+
   <script>
     const form = document.getElementById('emailForm');
     const emailInput = document.getElementById('email');
@@ -34,7 +48,6 @@
       e.preventDefault();
       const email = (emailInput.value || '').trim();
 
-      // בדיקה בסיסית לצד לקוח
       if (!email) {
         statusEl.textContent = '❌ יש להזין כתובת מייל';
         statusEl.className = 'err';
@@ -42,7 +55,6 @@
         return;
       }
 
-      // מצב "שולח"
       sendBtn.disabled = true;
       statusEl.textContent = '⏳ שולח את הדוח, ייתכן שייקח חצי דקה-דקה...';
       statusEl.className = 'info';
@@ -59,8 +71,6 @@
         if (res.ok) {
           statusEl.textContent = `✅ ${data.message || 'הדוח נשלח בהצלחה'} (${email})`;
           statusEl.className = 'ok';
-          // אופציונלי: ניקוי השדה
-          // emailInput.value = '';
         } else {
           statusEl.textContent = `❌ ${data.message || 'אירעה שגיאה בשליחה'}`;
           statusEl.className = 'err';
